@@ -80,13 +80,17 @@ class NeuralNetwork(object):
         output_grad = output_errors
         
         # TODO: Backpropagated error
-        hidden_errors = np.dot(output_grad, self.weights_hidden_to_output) # errors propagated to the hidden layer
-        hidden_grad = hidden_errors.T * hidden_outputs * (1 - hidden_outputs) # hidden layer gradients
-        
+        # hidden_errors = np.dot(output_grad, self.weights_hidden_to_output) 
+        # hidden_grad = hidden_errors.T * hidden_outputs * (1 - hidden_outputs) 
+        hidden_errors = np.dot(self.weights_hidden_to_output.T, output_errors)
+        hidden_grad = hidden_outputs * (1.0 - hidden_outputs)
+
         # TODO: Update the weights
-        self.weights_hidden_to_output += self.lr * output_grad * hidden_outputs.T # update hidden-to-output weights with gradient descent step
-        self.weights_input_to_hidden += self.lr * hidden_grad * inputs.T # update input-to-hidden weights with gradient descent step
-        
+        # self.weights_hidden_to_output += self.lr * output_grad * hidden_outputs.T
+        # self.weights_input_to_hidden += self.lr * hidden_grad * inputs.T
+        self.weights_hidden_to_output += self.lr * np.dot(output_errors, hidden_outputs.T)
+        self.weights_input_to_hidden += self.lr * np.dot(hidden_errors * hidden_grad, inputs.T)
+
     def run(self, inputs_list):
         # Run a forward pass through the network
         inputs = np.array(inputs_list, ndmin=2).T
@@ -109,9 +113,9 @@ def MSE(y, Y):
 import sys
 
 ### Set the hyperparameters here ###
-epochs = 100
-learning_rate = 0.1
-hidden_nodes = 2
+epochs = 5000
+learning_rate = 0.01
+hidden_nodes = 20
 output_nodes = 1
 
 N_i = train_features.shape[1]
